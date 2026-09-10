@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface AmeWeekRepository extends JpaRepository<AmeWeek, Long> {
     Optional<AmeWeek> findByName(String weekName);
+
+
 }

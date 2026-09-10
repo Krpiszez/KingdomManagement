@@ -1,35 +1,43 @@
 package com.example.kingdom_management.service;
 
+import com.example.kingdom_management.domain.AmeScore;
 import com.example.kingdom_management.domain.Character;
 import com.example.kingdom_management.domain.Governor;
 import com.example.kingdom_management.domain.enums.CharacterType;
 import com.example.kingdom_management.repository.CharacterRepository;
 import com.example.kingdom_management.repository.GovernorRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @Service
 public class CharacterService {
 
     private final GovernorRepository governorRepository;
     private final CharacterRepository characterRepository;
+    private final AmeService ameService;
 
-    public CharacterService(GovernorRepository governorRepository, CharacterRepository characterRepository) {
+    public CharacterService(GovernorRepository governorRepository, CharacterRepository characterRepository, AmeService ameService) {
         this.governorRepository = governorRepository;
         this.characterRepository = characterRepository;
+        this.ameService = ameService;
     }
 
     public void importData(MultipartFile file) throws Exception {
         String filename = file.getOriginalFilename();
 
-        if (filename != null && filename.endsWith(".csv")) {
+        if (filename != null && filename.toLowerCase().endsWith(".csv")) {
             processCsv(file);
-        } else if (filename != null && (filename.endsWith(".xlsx") || filename.endsWith(".xls"))) {
+        } else if (filename != null && (filename.toLowerCase().endsWith(".xlsx") || filename.toLowerCase().endsWith(".xls"))) {
             processExcel(file);
         } else {
             throw new IllegalArgumentException("Unsupported file type. Please upload a .csv, .xlsx, or .xls file.");
@@ -37,49 +45,60 @@ public class CharacterService {
     }
 
     private void processCsv(MultipartFile file) throws Exception {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
-            String line;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .setIgnoreHeaderCase(true)
+                     .setTrim(true)
+                     .build())) {
 
-            int govNameIdx = -1;
-            int govIdIdx = -1;
-            int ownerNameIdx = -1;
-            int statusIdx = -1;
+            for (CSVRecord record : csvParser) {
+                String governorName = record.isMapped("Governor Name") ? record.get("Governor Name") : "";
+                String governorId = record.isMapped("Governor ID") ? record.get("Governor ID") : "";
+                String ownerName = record.isMapped("Owner Name") ? record.get("Owner Name") : "";
+                String status = record.isMapped("Status") ? record.get("Status") : "";
 
-            boolean isHeader = true;
+                String effectiveOwner = !ownerName.isBlank() ? ownerName : governorName;
 
-            while ((line = reader.readLine()) != null) {
-                if (line.isBlank()) {
-                    continue;
+                if (!effectiveOwner.isBlank() && !governorId.isBlank()) {
+                    Governor gov = saveGovernorIfNotExists(effectiveOwner);
+                    saveCharacterForGovernor(gov, governorId, governorName, status);
                 }
+            }
+        }
+    }
 
-                String[] values = line.split(",");
+    private void processExcel(MultipartFile file) throws Exception {
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+            Row headerRow = sheet.getRow(0);
 
-                if (isHeader) {
-                    for (int i = 0; i < values.length; i++) {
-                        String headerName = values[i].trim();
-                        if (headerName.equalsIgnoreCase("Governor Name")) {
-                            govNameIdx = i;
-                        } else if (headerName.equalsIgnoreCase("Governor ID")) {
-                            govIdIdx = i;
-                        } else if (headerName.equalsIgnoreCase("Owner Name")) {
-                            ownerNameIdx = i;
-                        } else if (headerName.equalsIgnoreCase("Status")) {
-                            statusIdx = i;
-                        }
-                    }
-                    isHeader = false;
-                    continue;
-                }
+            if (headerRow == null) return;
 
-                String governorName = (govNameIdx != -1 && govNameIdx < values.length) ? values[govNameIdx].trim() : "";
-                String governorId = (govIdIdx != -1 && govIdIdx < values.length) ? values[govIdIdx].trim() : "";
-                String ownerName = (ownerNameIdx != -1 && ownerNameIdx < values.length) ? values[ownerNameIdx].trim() : "";
-                String status = (statusIdx != -1 && statusIdx < values.length) ? values[statusIdx].trim() : "";
+            int govNameIdx = -1, govIdIdx = -1, ownerNameIdx = -1, statusIdx = -1;
 
-                // Determine owner name: Fallback to governorName if ownerName column is blank
-                String effectiveOwner = !ownerName.isEmpty() ? ownerName : governorName;
+            for (Cell cell : headerRow) {
+                String headerVal = formatter.formatCellValue(cell).trim();
+                if (headerVal.equalsIgnoreCase("Governor Name")) govNameIdx = cell.getColumnIndex();
+                else if (headerVal.equalsIgnoreCase("Governor ID")) govIdIdx = cell.getColumnIndex();
+                else if (headerVal.equalsIgnoreCase("Owner Name")) ownerNameIdx = cell.getColumnIndex();
+                else if (headerVal.equalsIgnoreCase("Status")) statusIdx = cell.getColumnIndex();
+            }
 
-                if (!effectiveOwner.isEmpty() && !governorId.isEmpty()) {
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                String governorName = govNameIdx != -1 ? formatter.formatCellValue(row.getCell(govNameIdx)).trim() : "";
+                String governorId = govIdIdx != -1 ? formatter.formatCellValue(row.getCell(govIdIdx)).trim() : "";
+                String ownerName = ownerNameIdx != -1 ? formatter.formatCellValue(row.getCell(ownerNameIdx)).trim() : "";
+                String status = statusIdx != -1 ? formatter.formatCellValue(row.getCell(statusIdx)).trim() : "";
+
+                String effectiveOwner = !ownerName.isBlank() ? ownerName : governorName;
+
+                if (!effectiveOwner.isBlank() && !governorId.isBlank()) {
                     Governor gov = saveGovernorIfNotExists(effectiveOwner);
                     saveCharacterForGovernor(gov, governorId, governorName, status);
                 }
@@ -95,7 +114,6 @@ public class CharacterService {
         try {
             Long parsedCharacterId = Long.parseLong(governorIdStr);
 
-            // Check if character already exists by ID
             if (characterRepository.findByCharacterId(parsedCharacterId).isEmpty()) {
                 Character character = new Character();
                 character.setCharacterId(parsedCharacterId);
@@ -112,38 +130,19 @@ public class CharacterService {
 
     private CharacterType parseCharacterType(String status) {
         if (status == null || status.isBlank()) {
-            return CharacterType.MAIN; // Default fallback
+            return CharacterType.MAIN;
         }
 
-        // Clean string (e.g. "Main Account" -> "MAIN_ACCOUNT" or "MAIN")
         String cleanStatus = status.trim().toUpperCase().replaceAll("[^A-Z0-9_]", "_");
 
         try {
             return CharacterType.valueOf(cleanStatus);
         } catch (IllegalArgumentException e) {
-            // Match against partial names or fall back to standard types
             if (cleanStatus.contains("MAIN")) return CharacterType.MAIN;
             if (cleanStatus.contains("ALT")) return CharacterType.ALT;
             if (cleanStatus.contains("FARM")) return CharacterType.FARM;
 
-            return CharacterType.MAIN; // Fallback
-        }
-    }
-
-    private void processExcel(MultipartFile file) throws Exception {
-        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0);
-
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
-
-                Cell governorNameCell = row.getCell(0);
-                if (governorNameCell != null) {
-                    String governorName = governorNameCell.getStringCellValue().trim();
-                    saveGovernorIfNotExists(governorName);
-                }
-            }
+            return CharacterType.MAIN;
         }
     }
 
@@ -158,5 +157,34 @@ public class CharacterService {
                     newGov.setGovernorName(governorName);
                     return governorRepository.save(newGov);
                 });
+    }
+
+    public Character getCharacterById(Long characterId) {
+        return characterRepository.findByCharacterId(characterId)
+                .orElseThrow(() -> new RuntimeException("Character not found: " + characterId));
+    }
+
+    @Transactional
+    public void setTotalScoreForGovernors(Long ameWeekId) {
+        List<Character> mainCharacters = characterRepository.findByType(CharacterType.MAIN);
+
+        for (Character mainCharacter : mainCharacters) {
+            Governor governor = mainCharacter.getGovernor();
+            if (governor == null) continue;
+
+            int totalScore = governor.getCharacters().stream()
+                    .filter(c -> c.getScores() != null)
+                    .flatMap(c -> c.getScores().stream())
+                    .filter(score -> score.getAmeWeek() != null && ameWeekId.equals(score.getAmeWeek().getId()))
+                    .mapToInt(AmeScore::getIndividualScore)
+                    .sum();
+
+            // Fetch score safely using the updated repository method
+            ameService.getScoreByCharacterIdAndAmeWeekId(mainCharacter.getId(), ameWeekId)
+                    .ifPresent(ameScore -> {
+                        ameScore.setTotalGovernorScore(totalScore);
+                        ameService.saveAmeScore(ameScore);
+                    });
+        }
     }
 }

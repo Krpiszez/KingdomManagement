@@ -174,8 +174,10 @@
                 <tbody>
                 <tr th:each="governor : ${governors}">
                     <td class="fw-bold" th:text="${governor.id}">1</td>
-                    <td th:text="${governor.governorName}">King Arthur</td>
                     <td>
+                        <a th:href="@{/governors/{id}(id=${governor.id})}"
+                           th:text="${governor.governorName}">Governor Name</a>
+                    </td>                    <td>
                         <span class="badge-power" th:text="${governor.mainPower != null ? #numbers.formatInteger(governor.mainPower, 1, 'DEFAULT') : '0'}">
                             50,000,000
                         </span>

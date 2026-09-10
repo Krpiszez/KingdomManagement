@@ -4,63 +4,73 @@
     <meta charset="UTF-8">
     <title>Score Calculations - Kingdom Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .calc-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+        }
+        .calc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+            color: inherit;
+        }
+        .card-disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="/">Kingdom Management</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/scores/calculate">Score Calculations</a></li>
-                <li class="nav-item"><a class="nav-link" href="/ame/import">AME Calculations</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
-<div class="container mt-4">
+<div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Score Calculations</h2>
-        <!-- Redirect Button to AME Page -->
-        <a href="/ame/import" class="btn btn-success">
-            Proceed to AME Record Upload &rarr;
-        </a>
+        <h2><i class="fa-solid fa-calculator me-2"></i>Score Calculation Modules</h2>
+        <a href="/" class="btn btn-outline-secondary">Back to Dashboard</a>
     </div>
 
-    <!-- Dynamic Calculation Summary Table -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white">
-            <h5 class="mb-0">Governor & Character Summary</h5>
+    <div class="row g-4">
+        <!-- Active Module: AME Calculation -->
+        <div class="col-md-6 col-lg-4">
+            <a th:href="@{/ame/scores/calculate}" class="card h-100 shadow-sm calc-card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-primary">Active</span>
+                        <i class="fa-solid fa-trophy fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">AME Calculation</h5>
+                    <p class="card-text text-muted">
+                        Calculate weekly Alliance Mobilization Event (AME) performance scores and rankings.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-end pb-3">
+                    <span class="btn btn-sm btn-primary">Open Calculator &rarr;</span>
+                </div>
+            </a>
         </div>
-        <div class="card-body">
-            <table class="table table-hover">
-                <thead class="table-light">
-                <tr>
-                    <th>Character ID</th>
-                    <th>Character Name</th>
-                    <th>Governor</th>
-                    <th>Total AME Score</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="score : ${calculatedScores}">
-                    <td th:text="${score.character.id}">101</td>
-                    <td th:text="${score.character.name}">Lancelot</td>
-                    <td th:text="${score.governor.name}">Governor Alex</td>
-                    <td th:text="${score.score}">4,250</td>
-                    <td><span class="badge bg-success">Active</span></td>
-                </tr>
-                <tr th:if="${#lists.isEmpty(calculatedScores)}">
-                    <td colspan="5" class="text-center text-muted">No calculated scores available yet. Upload new records from the AME page.</td>
-                </tr>
-                </tbody>
-            </table>
+
+        <!-- Placeholder Module for Future Expansion -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm card-disabled border-secondary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-secondary">Coming Soon</span>
+                        <i class="fa-solid fa-shield-halved fa-2x text-secondary"></i>
+                    </div>
+                    <h5 class="card-title fw-bold text-muted">Kingdom VS Kingdom</h5>
+                    <p class="card-text text-muted">
+                        KvK event participation and kill points calculator module.
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-0 text-end pb-3">
+                    <button class="btn btn-sm btn-outline-secondary" disabled>Unavailable</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

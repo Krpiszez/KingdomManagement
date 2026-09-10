@@ -22,6 +22,8 @@ public class AmeWeek {
     private Integer weekNumber; // e.g., 1 for "1st Week", 2 for "2nd Week"
     private LocalDate startDate;
     private LocalDate endDate;
+    private Integer totalScore;
+    private Integer ameRank;
 
     @OneToMany(mappedBy = "ameWeek", cascade = CascadeType.ALL)
     private List<AmeScore> scores = new ArrayList<>();

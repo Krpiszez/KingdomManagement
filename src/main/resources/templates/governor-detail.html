@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${governor.governorName} + ' - Details'">Governor Details</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border: none; border-radius: 0.75rem; }
+        .avatar-circle {
+            width: 48px;
+            height: 48px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body class="bg-light pb-5">
+
+<div class="container mt-4">
+
+    <!-- Top Navigation -->
+    <div class="mb-3">
+        <a href="/governors" class="btn btn-outline-secondary btn-sm rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Back to Governors
+        </a>
+    </div>
+
+    <!-- Governor Header Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar-circle text-primary fw-bold">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div>
+                    <h2 class="h3 mb-0 fw-bold" th:text="${governor.governorName}">Governor Name</h2>
+                    <small class="text-muted">ID: <span th:text="${governor.id}">#1</span></small>
+                </div>
+            </div>
+            <div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fs-6">
+                    <i class="bi bi-lightning-charge-fill me-1"></i>
+                    Main Power: <span th:text="${#numbers.formatInteger(governor.mainPower, 0, 'COMMA')}">0</span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Character List Sidebar -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="bi bi-people me-2"></i>Characters
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item p-3 border-0 border-bottom" th:each="character : ${characters}">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="mb-0 fw-bold text-dark" th:text="${character.characterName}">Character Name</h6>
+                                <span class="badge bg-secondary-subtle text-secondary rounded-pill" th:text="${character.type}">Type</span>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="bi bi-shield-lock me-1"></i>Power:
+                                <span class="fw-semibold text-dark" th:text="${#numbers.formatInteger(character.power, 0, 'COMMA')}">0</span>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(characters)}" class="p-3 text-muted text-center">
+                            No characters assigned.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AME Performance Main Section -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3 border-0 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <h5 class="card-title mb-0 fw-bold text-secondary">
+                        <i class="bi bi-trophy me-2"></i>AME Performance
+                    </h5>
+
+                    <!-- Week Selector Form -->
+                    <form method="get" th:action="@{/governors/{id}(id=${governor.id})}" class="m-0">
+                        <select id="weekSelect" name="weekId" class="form-select form-select-sm fw-semibold border-primary-subtle" onchange="this.form.submit()">
+                            <option value="">-- Select Week --</option>
+                            <option th:each="week : ${weeks}"
+                                    th:value="${week.id}"
+                                    th:text="${week.name}"
+                                    th:selected="${week.id == selectedWeekId}">Week 1</option>
+                        </select>
+                    </form>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                            <tr>
+                                <th class="ps-3">Character</th>
+                                <th>Score</th>
+                                <th>Tasks Done</th>
+                                <th class="pe-3">Status</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="score : ${ameScores}">
+                                <td class="ps-3 fw-semibold" th:text="${score.character != null ? score.character.characterName : 'N/A'}">Character</td>
+                                <td class="fw-bold text-primary" th:text="${#numbers.formatInteger(score.individualScore, 0, 'COMMA')}">0</td>
+                                <td th:text="${score.tasksDone}">0</td>
+                                <td class="pe-3">
+                                        <span th:if="${score.status == 'PASS'}" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">
+                                            <i class="bi bi-check-circle-fill me-1"></i> PASS
+                                        </span>
+                                    <span th:if="${score.status == 'FAIL'}" class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 rounded-pill">
+                                            <i class="bi bi-x-circle-fill me-1"></i> FAIL
+                                        </span>
+                                    <span th:if="${score.status != 'PASS' and score.status != 'FAIL'}"
+                                          class="badge bg-secondary-subtle text-secondary px-2 py-1 rounded-pill"
+                                          th:text="${score.status}">N/A</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(ameScores)}">
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                                    No AME performance records found for this week.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

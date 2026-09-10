@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Score Calculations - Kingdom Management</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        .sortable {
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+        .sortable:hover {
+            background-color: #e9ecef !important;
+        }
+        .sort-icon {
+            font-size: 0.8em;
+            margin-left: 6px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Kingdom Management</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/ame/scores/calculate">Score Calculations</a></li>
+                <li class="nav-item"><a class="nav-link" href="/ame/import">AME Calculations</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Score Calculations</h2>
+        <a href="/ame/import" class="btn btn-success">
+            Proceed to AME Record Upload &rarr;
+        </a>
+    </div>
+
+    <!-- Dynamic Calculation Summary Table -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0 d-inline-block me-3">Governor & Character Summary</h5>
+
+                <!-- Display Selected Week Stats -->
+                <span th:if="${selectedWeek != null}" class="badge bg-primary fs-6 me-2">
+                    <i class="bi bi-trophy-fill me-1"></i> Week Rank:
+                    <span th:text="${selectedWeek.ameRank != null ? selectedWeek.ameRank : 'N/A'}">1</span>
+                </span>
+                <span th:if="${selectedWeek != null}" class="badge bg-success fs-6">
+                    <i class="bi bi-star-fill me-1"></i> Total Score:
+                    <span th:text="${selectedWeek.totalScore != null ? #numbers.formatInteger(selectedWeek.totalScore, 1, 'COMMA') : '0'}">10,000</span>
+                </span>
+            </div>
+
+            <!-- Week Selection Dropdown Form -->
+            <form th:action="@{/ame/scores/calculate}" method="get" class="d-flex align-items-center gap-2 m-0">
+                <label for="weekSelect" class="form-label mb-0 fw-semibold">Select Week:</label>
+                <select id="weekSelect" name="weekId" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                    <option value="" th:selected="${selectedWeekId == null}">All Weeks / Latest</option>
+                    <option th:each="week : ${weeks}"
+                            th:value="${week.id}"
+                            th:text="${week.name}"
+                            th:selected="${week.id == selectedWeekId}">
+                        Week 1
+                    </option>
+                </select>
+            </form>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover align-middle" id="scoresTable">
+                <thead class="table-light">
+                <tr>
+                    <th class="sortable" onclick="sortTable(0, 'number')">Character ID <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(1, 'string')">Character Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(2, 'string')">Governor <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(3, 'string')">Type <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(4, 'number')">Individual Score <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(5, 'number')">Total Score <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(6, 'string')">Status <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="score : ${calculatedScores}">
+                    <td th:text="${score.character.id}">101</td>
+                    <td th:text="${score.character.characterName}">Lancelot</td>
+                    <!-- Governor Column (Clickable link with fallback for null governors) -->
+                    <td>
+                        <a th:if="${score.character.governor != null}"
+                           th:href="@{/governors/{id}(id=${score.character.governor.id})}"
+                           th:text="${score.character.governor.governorName}"
+                           class="text-decoration-none fw-semibold">
+                            Governor Alex
+                        </a>
+                        <span th:unless="${score.character.governor != null}" class="text-muted">—</span>
+                    </td>
+                    <td>
+                        <span th:class="${#strings.equalsIgnoreCase(score.character.type, 'MAIN') ? 'badge bg-primary' : 'badge bg-secondary'}"
+                              th:text="${score.character.type}">
+                            MAIN
+                        </span>
+                    </td>
+
+                    <td class="fw-bold" th:text="${#numbers.formatInteger(score.individualScore, 1, 'COMMA')}">1,200</td>
+
+                    <td>
+                        <span th:if="${#strings.equalsIgnoreCase(score.character.type, 'MAIN')}"
+                              class="fw-bold text-success"
+                              th:text="${#numbers.formatInteger(score.totalGovernorScore, 1, 'COMMA')}">
+                            3,500
+                        </span>
+                        <span th:unless="${#strings.equalsIgnoreCase(score.character.type, 'MAIN')}" class="text-muted">—</span>
+                    </td>
+
+                    <td><span class="badge bg-success">Active</span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(calculatedScores)}" id="emptyRow">
+                    <td colspan="7" class="text-center text-muted py-4">
+                        No calculated scores available for this selection. Upload new records from the AME page.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function sortTable(columnIndex, type) {
+        const table = document.getElementById("scoresTable");
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr:not(#emptyRow)"));
+        const headers = table.querySelectorAll("th");
+        const targetHeader = headers[columnIndex];
+
+        if (rows.length === 0) return;
+
+        const currentIcon = targetHeader.querySelector(".sort-icon");
+        const isAscending = currentIcon.classList.contains("bi-caret-up-fill") ? false : true;
+
+        headers.forEach(th => {
+            const icon = th.querySelector(".sort-icon");
+            if (icon) {
+                icon.className = "bi bi-arrow-down-up sort-icon text-muted";
+            }
+        });
+
+        if (isAscending) {
+            currentIcon.className = "bi bi-caret-up-fill sort-icon text-dark";
+        } else {
+            currentIcon.className = "bi bi-caret-down-fill sort-icon text-dark";
+        }
+
+        rows.sort((rowA, rowB) => {
+            let valA = rowA.children[columnIndex].innerText.trim();
+            let valB = rowB.children[columnIndex].innerText.trim();
+
+            if (type === 'number') {
+                valA = parseFloat(valA.replace(/,/g, '')) || 0;
+                valB = parseFloat(valB.replace(/,/g, '')) || 0;
+                return isAscending ? valA - valB : valB - valA;
+            } else {
+                return isAscending
+                    ? valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' })
+                    : valB.localeCompare(valA, undefined, { numeric: true, sensitivity: 'base' });
+            }
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    }
+</script>
+</body>
+</html>

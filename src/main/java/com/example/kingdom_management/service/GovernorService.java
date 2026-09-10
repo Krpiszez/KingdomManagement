@@ -18,4 +18,12 @@ public class GovernorService {
     public List<Governor> findAll() {
         return governorRepository.findAll();
     }
+
+    public Governor getGovernorById(Long id) {
+        return governorRepository.findById(id).orElseThrow();
+    }
+
+    public Governor findById(Long id) {
+        return governorRepository.findById(id).orElseThrow();
+    }
 }

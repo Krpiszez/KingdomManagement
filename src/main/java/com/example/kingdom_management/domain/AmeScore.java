@@ -15,6 +15,7 @@ public class AmeScore {
     private Long id;
 
     private Integer individualScore;
+    private Integer totalGovernorScore;
     private Integer tasksDone;
     private Integer attemptsUsed;
     private String status; // PASS / FAIL
