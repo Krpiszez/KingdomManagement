@@ -11,8 +11,18 @@ public class NavigationController {
         return "index";
     }
 
-    @GetMapping("/governors")
-    public String governorManagement() {
-        return "governors";
+    @GetMapping("/performance-tracker")
+    public String performanceTracker() {
+        return "performance-tracker";
     }
+
+    @GetMapping("/score-calculation")
+    public String scoreCalculation() {
+        return "score-calculation";
+    }
+
+//    @GetMapping("/ame/import")
+//    public String ameImport() {
+//        return "ame-import";
+//    }
 }

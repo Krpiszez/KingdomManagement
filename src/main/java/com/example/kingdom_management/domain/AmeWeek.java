@@ -18,6 +18,7 @@ public class AmeWeek {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
     private Integer weekNumber; // e.g., 1 for "1st Week", 2 for "2nd Week"
     private LocalDate startDate;
     private LocalDate endDate;
