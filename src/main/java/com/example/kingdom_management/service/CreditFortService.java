@@ -189,19 +189,25 @@ public class CreditFortService {
         List<Governor> governors = governorRepository.findAll();
 
         for (Governor governor : governors) {
-            if (governor.getCharacters() == null || governor.getCharacters().isEmpty()) {
-                continue;
-            }
-
             List<CharacterCreditFortScore> scores = characterCreditFortScoreRepository
                     .findByCharacterGovernorIdAndCreditFortWeekId(governor.getId(), week.getId());
+
+            // Only characters that actually show up in this week's uploaded file
+            // are treated as participating - anyone on the roster who wasn't in
+            // the file (e.g. not part of this event) is exempt from the
+            // requirement entirely, rather than dragging the governor's total
+            // requirement up for an account that didn't take part.
+            if (scores.isEmpty()) {
+                continue;
+            }
 
             int totalCredits = scores.stream()
                     .mapToInt(CharacterCreditFortScore::getTotalCredits)
                     .sum();
 
-            int requiredCredits = governor.getCharacters().stream()
-                    .mapToInt(c -> c.getType().getRequiredCredits())
+            int requiredCredits = scores.stream()
+                    .filter(s -> s.getCharacter() != null)
+                    .mapToInt(s -> s.getCharacter().getType().getRequiredCredits())
                     .sum();
 
             int totalForts = scores.stream()

@@ -1,10 +1,13 @@
 spring:
   application:
     name: kingdom_management
+  # DB credentials are read from environment variables (DB_URL, DB_USERNAME, DB_PASSWORD).
+  # The values after the colon (e.g. root / 1234) are local-dev fallbacks only - override
+  # them with real env vars for anything beyond your own machine.
   datasource:
-    url: jdbc:mysql://localhost:3306/rok_management_tools?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: 1234
+    url: ${DB_URL:jdbc:mysql://localhost:3306/rok_management_tools?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:

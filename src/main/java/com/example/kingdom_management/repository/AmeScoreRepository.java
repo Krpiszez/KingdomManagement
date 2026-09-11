@@ -23,4 +23,5 @@ public interface AmeScoreRepository extends JpaRepository<AmeScore, Long> {
 
     // AmeScoreRepository.java
     @Query("SELECT s FROM AmeScore s WHERE s.character.governor.id = :governorId AND s.ameWeek.id = :weekId")
-    List<AmeScore> findByGovernorIdAndAmeWeekId(@Param("governorId") Long governorId, @Param("weekId") Long weekId);}
+    List<AmeScore> findByGovernorIdAndAmeWeekId(@Param("governorId") Long governorId, @Param("weekId") Long weekId);
+}

@@ -21,7 +21,7 @@ public class Governor {
     @Column(nullable = false, unique = true)
     private String governorName;
 
-    private Integer mainPower;
+    private Long mainPower;
 
     // One Governor can have many Characters
     @OneToMany(mappedBy = "governor", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -30,7 +30,7 @@ public class Governor {
     public Governor() {
     }
 
-    public Governor(String governorName, Integer mainPower) {
+    public Governor(String governorName, Long mainPower) {
         this.governorName = governorName;
         this.mainPower = mainPower;
     }

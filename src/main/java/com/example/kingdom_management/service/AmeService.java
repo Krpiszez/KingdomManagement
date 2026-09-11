@@ -7,10 +7,10 @@ import com.example.kingdom_management.domain.enums.AllianceRank;
 import com.example.kingdom_management.domain.enums.CharacterType;
 import com.example.kingdom_management.repository.AmeScoreRepository;
 import com.example.kingdom_management.repository.AmeWeekRepository;
-import com.example.kingdom_management.repository.CharacterRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import org.jspecify.annotations.NonNull;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +35,8 @@ public class AmeService {
     @Autowired
     private AmeWeekRepository ameWeekRepository;
 
+    private static final List<String> REQUIRED_HEADERS = List.of("Player ID", "Score", "Tasks done", "Attempts used");
+
     @Transactional
     public void processAmeUpload(MultipartFile file, Integer weekNumber) {
         String weekName = "Week " + weekNumber;
@@ -47,44 +50,34 @@ public class AmeService {
 
         int calculatedTotalScore = 0;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            String line;
-            int characterNameIdx = -1;
-            int characterIdIdx = -1;
-            int ameScoreIdx = -1;
-            int ameTaskDoneIdx = -1;
-            int ameAttemptUsedIdx = -1;
-            boolean isHeader = true;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+             CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                     .setHeader()
+                     .setSkipHeaderRecord(true)
+                     .setIgnoreHeaderCase(true)
+                     .setTrim(true)
+                     .build())) {
 
-            while ((line = reader.readLine()) != null) {
-
-                String[] values = line.split(",");
-
-                if (isHeader) {
-                    for (int i = 0; i < values.length; i++) {
-                        String headerName = values[i].replaceAll("^[^a-zA-Z0-9]+", "").trim();
-                        if (headerName.equalsIgnoreCase("Name")) {
-                            characterNameIdx = i;
-                        } else if (headerName.equalsIgnoreCase("Player ID")) {
-                            characterIdIdx = i;
-                        } else if (headerName.equalsIgnoreCase("Score")) {
-                            ameScoreIdx = i;
-                        } else if (headerName.equalsIgnoreCase("Tasks done")) {
-                            ameTaskDoneIdx = i;
-                        } else if (headerName.equalsIgnoreCase("Attempts used")) {
-                            ameAttemptUsedIdx = i;
-                        }
-                    }
-                    isHeader = false;
-                    continue;
+            for (String requiredHeader : REQUIRED_HEADERS) {
+                if (!csvParser.getHeaderNames().stream().anyMatch(h -> h.equalsIgnoreCase(requiredHeader))) {
+                    throw new IllegalArgumentException("Missing required column: \"" + requiredHeader + "\"");
                 }
+            }
 
-                String characterName = values[characterNameIdx];
-                Long characterId = Long.valueOf(values[characterIdIdx]);
-                Integer tasksDone = Integer.valueOf(values[ameTaskDoneIdx]);
-                Integer attempsUsed = Integer.valueOf(values[ameAttemptUsedIdx]);
-                Integer individualScore = Integer.valueOf(values[ameScoreIdx]);
+            for (CSVRecord record : csvParser) {
+                Long characterId;
+                Integer tasksDone;
+                Integer attemptsUsed;
+                Integer individualScore;
 
+                try {
+                    characterId = Long.valueOf(record.get("Player ID"));
+                    tasksDone = Integer.valueOf(record.get("Tasks done"));
+                    attemptsUsed = Integer.valueOf(record.get("Attempts used"));
+                    individualScore = Integer.valueOf(record.get("Score"));
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid numeric value on row " + record.getRecordNumber() + ": " + e.getMessage());
+                }
 
                 Character character = characterService.getCharacterById(characterId);
 
@@ -102,7 +95,7 @@ public class AmeService {
                 ameScore.setAmeWeek(ameWeek);
                 ameScore.setIndividualScore(individualScore);
                 ameScore.setTasksDone(tasksDone);
-                ameScore.setAttemptsUsed(attempsUsed);
+                ameScore.setAttemptsUsed(attemptsUsed);
                 ameScore.setStatus(status);
 
                 ameScoreRepository.save(ameScore);
@@ -121,14 +114,14 @@ public class AmeService {
 
     private String getAmeStatusForCharacter(Character character, Integer individualScore) {
         if (character.getType().equals(CharacterType.MAIN)) {
-            if (individualScore >= 1000) return "Pass";
-            return "Fail";
+            if (individualScore >= 1000) return "PASS";
+            return "FAIL";
         } else if (character.getType().equals(CharacterType.FARM) || character.getType().equals(CharacterType.ALT)
-        || character.getType().equals(CharacterType.FILLER)) {
-            if (individualScore >= 1200) return "Pass";
-            return "Fail";
+                || character.getType().equals(CharacterType.FILLER)) {
+            if (individualScore >= 1200) return "PASS";
+            return "FAIL";
         } else {
-            return "Fail"; // Default case
+            return "FAIL"; // Default case
 
         }
     }
