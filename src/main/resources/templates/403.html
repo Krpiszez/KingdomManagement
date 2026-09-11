@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Access Denied')}"></head>
+<body>
+<main class="app-page medium d-flex align-items-center" style="min-height: 100vh;">
+    <section class="app-card p-4 p-md-5 mx-auto text-center" style="width: 100%; max-width: 560px;">
+        <div class="metric-card-icon mx-auto mb-3"><i class="bi bi-shield-x"></i></div>
+        <h1 class="page-title">Access denied</h1>
+        <p class="page-subtitle mx-auto mb-4">
+            Your account does not have permission to perform that action.
+        </p>
+        <a th:href="@{/}" class="btn app-btn-primary">
+            <i class="bi bi-house-door me-1"></i> Return home
+        </a>
+    </section>
+</main>
+
+<script th:replace="~{fragments/layout :: scripts}"></script>
+<script th:replace="~{fragments/layout :: appScripts}"></script>
+</body>
+</html>

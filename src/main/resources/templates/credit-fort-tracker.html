@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('Credit & Fort Tracker')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar('performance')}"></nav>
@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a th:href="@{/credit-fort/import}" class="btn app-btn-primary btn-sm">
+                <a sec:authorize="hasAnyRole('ADMIN', 'OFFICER')" th:href="@{/credit-fort/import}" class="btn app-btn-primary btn-sm">
                     <i class="bi bi-cloud-upload me-1"></i> Upload Week
                 </a>
                 <form th:action="@{/credit-fort/tracker}" method="get" class="d-flex align-items-center gap-2 m-0">

@@ -21,3 +21,17 @@ spring:
 
 server:
   port: 8080
+app:
+  security:
+    initial-users:
+      # Set the corresponding environment variables before first startup.
+      # Each account is created only if the username does not already exist.
+      admin:
+        username: ${APP_INITIAL_ADMIN_USERNAME:admin3161}
+        password: ${APP_INITIAL_ADMIN_PASSWORD:1234}
+      officer:
+        username: ${APP_INITIAL_OFFICER_USERNAME:officer3161}
+        password: ${APP_INITIAL_OFFICER_PASSWORD:1234}
+      kingdom-member:
+        username: ${APP_INITIAL_KINGDOM_MEMBER_USERNAME:member3161}
+        password: ${APP_INITIAL_KINGDOM_MEMBER_PASSWORD:1234}

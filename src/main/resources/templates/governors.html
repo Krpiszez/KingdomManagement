@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments/layout :: head('Governor Management')}"></head>
 <body>
 <nav th:replace="~{fragments/layout :: navbar('governors')}"></nav>
@@ -13,7 +13,7 @@
                 <h2 class="section-title">Governors</h2>
                 <p class="section-muted mb-0 small">Select a governor to view detailed performance.</p>
             </div>
-            <a th:href="@{/characters/import}" class="btn app-btn-primary">
+            <a sec:authorize="hasAnyRole('ADMIN', 'OFFICER')" th:href="@{/characters/import}" class="btn app-btn-primary">
                 <i class="bi bi-cloud-upload me-1"></i> Bulk Upload
             </a>
         </div>
@@ -60,13 +60,17 @@
                             <span th:if="${#lists.isEmpty(governor.characters)}" class="text-muted fst-italic">No characters assigned</span>
                         </td>
                         <td class="text-center">
-                            <a th:href="@{/governors/edit/{id}(id=${governor.id})}" class="btn btn-outline-primary btn-sm" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a th:href="@{/governors/delete/{id}(id=${governor.id})}" class="btn btn-outline-danger btn-sm" title="Delete"
-                               onclick="return confirm('Are you sure you want to delete this governor?')">
-                                <i class="bi bi-trash3"></i>
-                            </a>
+                            <span sec:authorize="hasAnyRole('ADMIN', 'OFFICER')">
+                                <a th:href="@{/governors/edit/{id}(id=${governor.id})}" class="btn btn-outline-primary btn-sm" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </span>
+                            <span sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{/governors/delete/{id}(id=${governor.id})}" class="btn btn-outline-danger btn-sm" title="Delete"
+                                   onclick="return confirm('Are you sure you want to delete this governor?')">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </span>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(governors)}">

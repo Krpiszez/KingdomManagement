@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -40,6 +40,29 @@
                     <a class="nav-link" th:classappend="${activePage == 'performance' ? ' active' : ''}" th:href="@{/performance-tracker}">
                         <i class="bi bi-graph-up-arrow me-1"></i> Performance Tracker
                     </a>
+                </li>
+                <li class="nav-item ms-lg-2" sec:authorize="isAuthenticated()">
+                    <span class="nav-link disabled text-white-50">
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span sec:authentication="name">User</span>
+                    </span>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <span class="nav-link text-warning">
+                        <i class="bi bi-shield-lock me-1"></i> Admin
+                    </span>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('OFFICER')">
+                    <span class="nav-link text-info">
+                        <i class="bi bi-person-badge me-1"></i> Officer
+                    </span>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-light ms-lg-2">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>
