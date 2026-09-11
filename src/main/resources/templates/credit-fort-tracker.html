@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Score Calculations - Kingdom Management</title>
+    <title>Credit & Fort Tracker - Kingdom Management</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons CDN -->
@@ -32,44 +32,37 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                <li class="nav-item"><a class="nav-link active" href="/ame/scores/calculate">Score Calculations</a></li>
-                <li class="nav-item"><a class="nav-link" href="/ame/import">AME Calculations</a></li>
-                <li class="nav-item"><a class="nav-link" href="/credit-fort/tracker">Credit &amp; Fort Tracker</a></li>
+                <li class="nav-item"><a class="nav-link" href="/ame/scores/calculate">AME Score Calculations</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/credit-fort/tracker">Credit &amp; Fort Tracker</a></li>
+                <li class="nav-item"><a class="nav-link" href="/credit-fort/import">Credit &amp; Fort Upload</a></li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Score Calculations</h2>
-        <a href="/ame/import" class="btn btn-success">
-            Proceed to AME Record Upload &rarr;
+        <h2>Weekly Credit &amp; Fort Tracker</h2>
+        <a href="/credit-fort/import" class="btn btn-success">
+            Upload New Week Data &rarr;
         </a>
     </div>
 
-    <!-- Dynamic Calculation Summary Table -->
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3 flex-wrap gap-2">
             <div>
-                <h5 class="mb-0 d-inline-block me-3">Governor & Character Summary</h5>
-
-                <!-- Display Selected Week Stats -->
-                <span th:if="${selectedWeek != null}" class="badge bg-primary fs-6 me-2">
-                    <i class="bi bi-trophy-fill me-1"></i> Week Rank:
-                    <span th:text="${selectedWeek.ameRank != null ? selectedWeek.ameRank : 'N/A'}">1</span>
-                </span>
-                <span th:if="${selectedWeek != null}" class="badge bg-success fs-6">
-                    <i class="bi bi-star-fill me-1"></i> Total Score:
-                    <span th:text="${selectedWeek.totalScore != null ? #numbers.formatInteger(selectedWeek.totalScore, 1, 'COMMA') : '0'}">10,000</span>
+                <h5 class="mb-0 d-inline-block me-3">Governor Summary</h5>
+                <span th:if="${selectedWeek != null}" class="badge bg-secondary fs-6 me-2">
+                    <i class="bi bi-shield-fill me-1"></i> Fort Requirement:
+                    <span th:text="${selectedWeek.fortRequirement}">70</span>
                 </span>
             </div>
 
             <!-- Week Selection Dropdown Form -->
-            <form th:action="@{/ame/scores/calculate}" method="get" class="d-flex align-items-center gap-2 m-0">
+            <form th:action="@{/credit-fort/tracker}" method="get" class="d-flex align-items-center gap-2 m-0">
                 <label for="weekSelect" class="form-label mb-0 fw-semibold">Select Week:</label>
                 <select id="weekSelect" name="weekId" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                    <option value="" th:selected="${selectedWeekId == null}">All Weeks / Latest</option>
+                    <option value="" th:selected="${selectedWeekId == null}">Latest Week</option>
                     <option th:each="week : ${weeks}"
                             th:value="${week.id}"
                             th:text="${week.name}"
@@ -81,55 +74,48 @@
         </div>
 
         <div class="card-body">
-            <table class="table table-hover align-middle" id="scoresTable">
+            <table class="table table-hover align-middle" id="summaryTable">
                 <thead class="table-light">
                 <tr>
-                    <th class="sortable" onclick="sortTable(0, 'number')">Character ID <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                    <th class="sortable" onclick="sortTable(1, 'string')">Character Name <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                    <th class="sortable" onclick="sortTable(2, 'string')">Governor <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                    <th class="sortable" onclick="sortTable(3, 'string')">Type <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                    <th class="sortable" onclick="sortTable(4, 'number')">Individual Score <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                    <th class="sortable" onclick="sortTable(5, 'number')">Total Score <i class="bi bi-arrow-down-up sort-icon"></i></th>
-                    <th class="sortable" onclick="sortTable(6, 'string')">Status <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(0, 'string')">Governor <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(1, 'number')">Total Credits <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(2, 'number')">Required Credits <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(3, 'string')">Credit Status <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(4, 'number')">Forts (Main+Farm) <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(5, 'string')">Fort Status <i class="bi bi-arrow-down-up sort-icon"></i></th>
+                    <th class="sortable" onclick="sortTable(6, 'number')">Main Forts (Reward Tracking) <i class="bi bi-arrow-down-up sort-icon"></i></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="score : ${calculatedScores}">
-                    <td th:text="${score.character.id}">101</td>
-                    <td th:text="${score.character.characterName}">Lancelot</td>
-                    <!-- Governor Column (Clickable link with fallback for null governors) -->
+                <tr th:each="summary : ${summaries}">
                     <td>
-                        <a th:if="${score.character.governor != null}"
-                           th:href="@{/governors/{id}(id=${score.character.governor.id})}"
-                           th:text="${score.character.governor.governorName}"
+                        <a th:if="${summary.governor != null}"
+                           th:href="@{/governors/{id}(id=${summary.governor.id})}"
+                           th:text="${summary.governor.governorName}"
                            class="text-decoration-none fw-semibold">
                             Governor Alex
                         </a>
-                        <span th:unless="${score.character.governor != null}" class="text-muted">—</span>
                     </td>
+                    <td th:text="${#numbers.formatInteger(summary.totalCredits, 1, 'COMMA')}">220,000</td>
+                    <td th:text="${#numbers.formatInteger(summary.requiredCredits, 1, 'COMMA')}">220,000</td>
                     <td>
-                        <span th:class="${#strings.equalsIgnoreCase(score.character.type, 'MAIN') ? 'badge bg-primary' : 'badge bg-secondary'}"
-                              th:text="${score.character.type}">
-                            MAIN
+                        <span th:class="${summary.creditStatus == 'PASS' ? 'badge bg-success' : 'badge bg-danger'}"
+                              th:text="${summary.creditStatus}">
+                            PASS
                         </span>
                     </td>
-
-                    <td class="fw-bold" th:text="${#numbers.formatInteger(score.individualScore, 1, 'COMMA')}">1,200</td>
-
+                    <td th:text="${summary.totalForts}">70</td>
                     <td>
-                        <span th:if="${#strings.equalsIgnoreCase(score.character.type, 'MAIN')}"
-                              class="fw-bold text-success"
-                              th:text="${#numbers.formatInteger(score.totalGovernorScore, 1, 'COMMA')}">
-                            3,500
+                        <span th:class="${summary.fortStatus == 'PASS' ? 'badge bg-success' : 'badge bg-danger'}"
+                              th:text="${summary.fortStatus}">
+                            PASS
                         </span>
-                        <span th:unless="${#strings.equalsIgnoreCase(score.character.type, 'MAIN')}" class="text-muted">—</span>
                     </td>
-
-                    <td><span class="badge bg-success">Active</span></td>
+                    <td class="fw-bold text-primary" th:text="${summary.mainForts}">30</td>
                 </tr>
-                <tr th:if="${#lists.isEmpty(calculatedScores)}" id="emptyRow">
+                <tr th:if="${#lists.isEmpty(summaries)}" id="emptyRow">
                     <td colspan="7" class="text-center text-muted py-4">
-                        No calculated scores available for this selection. Upload new records from the AME page.
+                        No credit/fort data available for this selection. Upload new records from the import page.
                     </td>
                 </tr>
                 </tbody>
@@ -142,7 +128,7 @@
 
 <script>
     function sortTable(columnIndex, type) {
-        const table = document.getElementById("scoresTable");
+        const table = document.getElementById("summaryTable");
         const tbody = table.querySelector("tbody");
         const rows = Array.from(tbody.querySelectorAll("tr:not(#emptyRow)"));
         const headers = table.querySelectorAll("th");

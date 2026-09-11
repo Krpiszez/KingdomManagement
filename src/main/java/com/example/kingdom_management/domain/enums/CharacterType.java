@@ -20,4 +20,27 @@ public enum CharacterType {
 
         throw new IllegalArgumentException("Unknown character type: " + text);
     }
+
+    /**
+     * Weekly alliance-credit requirement (build + tech donations combined)
+     * for this character type. Summed across a governor's whole roster to
+     * get that governor's total required credits for the week.
+     */
+    public int getRequiredCredits() {
+        return switch (this) {
+            case MAIN -> 100_000;
+            case FARM, ALT, FILLER -> 120_000;
+            case DEADWEIGHT -> 0;
+        };
+    }
+
+    /**
+     * Whether forts done on this character count toward the governor's
+     * combined 70-fort weekly requirement. Fort counts are still recorded
+     * for every character type, this only controls what counts toward the
+     * pass/fail requirement.
+     */
+    public boolean countsTowardFortRequirement() {
+        return this == MAIN || this == FARM || this == ALT || this == FILLER;
+    }
 }
