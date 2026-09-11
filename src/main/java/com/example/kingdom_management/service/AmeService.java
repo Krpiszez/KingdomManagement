@@ -114,11 +114,11 @@ public class AmeService {
 
     private String getAmeStatusForCharacter(Character character, Integer individualScore) {
         if (character.getType().equals(CharacterType.MAIN)) {
-            if (individualScore >= 1000) return "PASS";
+            if (individualScore >= 2000) return "PASS";
             return "FAIL";
         } else if (character.getType().equals(CharacterType.FARM) || character.getType().equals(CharacterType.ALT)
                 || character.getType().equals(CharacterType.FILLER)) {
-            if (individualScore >= 1200) return "PASS";
+            if (individualScore >= 1000) return "PASS";
             return "FAIL";
         } else {
             return "FAIL"; // Default case

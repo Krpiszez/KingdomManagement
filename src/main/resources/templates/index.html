@@ -1,86 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome - Kingdom Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .welcome-card {
-            background: white;
-            padding: 50px 40px;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-            animation: slideIn 0.6s ease-out;
-        }
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-weight: 700;
-            font-size: 2.3rem;
-        }
-        .welcome-card p {
-            color: #7f8c8d;
-            font-size: 1.05rem;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .btn-custom {
-            padding: 12px 24px;
-            font-size: 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-bottom: 12px;
-            display: inline-block;
-            text-decoration: none;
-        }
-        .btn-custom:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-    </style>
-</head>
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
 <body>
+<nav th:replace="~{fragments/layout :: navbar('home')}"></nav>
 
-<div class="welcome-card">
-    <h1>👑 Kingdom Management</h1>
-    <p>Welcome! Manage your kingdom governors, keep track of performance metrics, and execute score calculations efficiently.</p>
+<main class="app-page medium">
+    <section class="app-card p-4 p-md-5 text-center">
+        <div class="metric-card-icon mx-auto mb-3"><i class="bi bi-crown-fill"></i></div>
+        <h1 class="page-title">Kingdom Management</h1>
+        <p class="page-subtitle mx-auto mb-4">
+            Manage governors and characters, then track the kingdom's performance in one place.
+        </p>
 
-    <div class="d-grid gap-2">
-        <a th:href="@{/governors}" class="btn btn-primary btn-custom">
-            Go to Governor Management →
-        </a>
-        <a th:href="@{/performance-tracker}" class="btn btn-outline-primary btn-custom">
-            Go to Performance Tracker →
-        </a>
-        <a th:href="@{/credit-fort/tracker}" class="btn btn-outline-primary btn-custom">
-            Go to Credit &amp; Fort Tracker →
-        </a>
-    </div>
-</div>
+        <div class="row g-3 justify-content-center text-start">
+            <div class="col-md-6">
+                <a th:href="@{/governors}" class="metric-card d-block text-decoration-none">
+                    <div class="metric-card-icon mb-3"><i class="bi bi-people"></i></div>
+                    <h2 class="h5 fw-bold text-dark">Governor Management</h2>
+                    <p class="section-muted mb-3">View governors, characters, power and individual performance.</p>
+                    <span class="btn app-btn-primary">Open Governor Management <i class="bi bi-arrow-right ms-1"></i></span>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a th:href="@{/performance-tracker}" class="metric-card d-block text-decoration-none">
+                    <div class="metric-card-icon mb-3"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h2 class="h5 fw-bold text-dark">Performance Tracker</h2>
+                    <p class="section-muted mb-3">Access Credit &amp; Fort and AME performance tracking modules.</p>
+                    <span class="btn app-btn-soft">Open Performance Tracker <i class="bi bi-arrow-right ms-1"></i></span>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:replace="~{fragments/layout :: scripts}"></script>
+<script th:replace="~{fragments/layout :: appScripts}"></script>
 </body>
 </html>

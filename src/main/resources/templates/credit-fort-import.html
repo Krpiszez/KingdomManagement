@@ -1,273 +1,56 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kingdom Management - Import Credit & Fort Data</title>
-    <style>
-        :root {
-            --primary-color: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --success-bg: #dcfce7;
-            --success-text: #15803d;
-            --error-bg: #fee2e2;
-            --error-text: #b91c1c;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        .container {
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-            padding: 40px;
-            max-width: 520px;
-            width: 100%;
-            border: 1px solid var(--border-color);
-        }
-
-        .header {
-            margin-bottom: 24px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 0 8px 0;
-        }
-
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .req-box {
-            background-color: #eef2ff;
-            border: 1px solid #c7d2fe;
-            border-radius: 8px;
-            padding: 14px 16px;
-            margin-bottom: 20px;
-            font-size: 0.82rem;
-            color: var(--text-main);
-            line-height: 1.5;
-        }
-
-        .req-box strong {
-            color: var(--primary-color);
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .alert-success {
-            background-color: var(--success-bg);
-            color: var(--success-text);
-        }
-
-        .alert-error {
-            background-color: var(--error-bg);
-            color: var(--error-text);
-        }
-
-        .file-drop-area {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 32px 16px;
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            background-color: #fafafa;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .file-drop-area:hover, .file-drop-area.drag-over {
-            border-color: var(--primary-color);
-            background-color: #f0fdf4;
-        }
-
-        .file-drop-area svg {
-            width: 48px;
-            height: 48px;
-            fill: none;
-            stroke: var(--text-muted);
-            stroke-width: 1.5;
-            margin-bottom: 12px;
-        }
-
-        .file-msg {
-            font-size: 0.9rem;
-            color: var(--text-main);
-            font-weight: 500;
-        }
-
-        .file-hint {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .file-input {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .file-name {
-            margin-top: 12px;
-            font-size: 0.875rem;
-            color: var(--primary-color);
-            font-weight: 600;
-            word-break: break-all;
-        }
-
-        .btn-submit {
-            margin-top: 24px;
-            width: 100%;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .btn-submit:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .nav-link {
-            display: block;
-            text-align: center;
-            margin-top: 16px;
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            text-decoration: none;
-        }
-
-        .nav-link:hover {
-            color: var(--text-main);
-        }
-    </style>
-</head>
+<head th:replace="~{fragments/layout :: head('Import Credit & Fort Data')}"></head>
 <body>
+<nav th:replace="~{fragments/layout :: navbar('performance')}"></nav>
 
-<div class="container">
-    <div class="header">
-        <h1>Import Credit &amp; Fort Data</h1>
-        <p>Upload weekly build/tech donation and fort completion numbers</p>
-    </div>
+<main class="app-page narrow">
+    <div th:replace="~{fragments/layout :: pageHeader('Import Credit & Fort Data', 'Upload weekly build, technology donation and fort completion numbers.', '/credit-fort/tracker')}"></div>
 
-    <div class="req-box">
-        Columns expected: <strong>Player ID</strong>, plus a fort count, a build number, and a tech number.<br>
-        Direct alliance-export headers are recognized automatically: <strong>Fort Destroyed</strong>, <strong>Building Time (seconds)</strong>, <strong>Mad Scientist Points</strong> &mdash; or the generic <strong>Forts Done</strong> / <strong>Build Credits</strong> / <strong>Tech Credits</strong>.<br>
-        Requirement per governor: <strong>100k</strong> credits per Main, <strong>120k</strong> per Farm/Alt/Filler (summed across the roster), plus <strong>70</strong> combined forts from Main + Farm characters.
-    </div>
+    <section class="app-card app-card-body upload-card">
+        <div class="req-box mb-4">
+            <strong>Expected data:</strong> Player ID, fort count, build number and tech number.<br>
+            Direct alliance-export headers are recognised automatically: <strong>Fort Destroyed</strong>, <strong>Building Time (seconds)</strong>, <strong>Mad Scientist Points</strong> — or generic <strong>Forts Done</strong> / <strong>Build Credits</strong> / <strong>Tech Credits</strong>.<br>
+            <strong>Requirements:</strong> 100k credits per Main, 120k per Farm/Alt/Filler, plus 70 combined forts from Main + Farm characters.
+        </div>
 
-    <!-- Success Message -->
-    <div th:if="${message}" class="alert alert-success" role="alert">
-        <span th:text="${message}"></span>
-    </div>
+        <div th:if="${message}" class="alert alert-success d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-check-circle-fill"></i><span th:text="${message}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i><span th:text="${error}"></span>
+        </div>
 
-    <!-- Error Message -->
-    <div th:if="${error}" class="alert alert-error" role="alert">
-        <span th:text="${error}"></span>
-    </div>
-
-    <form th:action="@{/credit-fort/import}" method="post" enctype="multipart/form-data">
-        <!-- Week Selection Field -->
-        <div style="margin-bottom: 16px;">
-            <label for="weekId" style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 6px;">
-                Select Week:
-            </label>
-            <select id="weekId" name="weekNumber" required style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color);">
+        <form th:action="@{/credit-fort/import}" method="post" enctype="multipart/form-data">
+            <label for="weekId" class="form-label fw-semibold">Select Week</label>
+            <select id="weekId" name="weekNumber" required class="form-select mb-3">
                 <option value="" disabled selected>Select a week</option>
-                <option value="1">Week 1</option>
-                <option value="2">Week 2</option>
-                <option value="3">Week 3</option>
-                <option value="4">Week 4</option>
-                <option value="5">Week 5</option>
-                <option value="6">Week 6</option>
-                <option value="7">Week 7</option>
-                <option value="8">Week 8</option>
-                <option value="9">Week 9</option>
-                <option value="10">Week 10</option>
+                <option th:each="n : ${#numbers.sequence(1,10)}" th:value="${n}" th:text="'Week ' + ${n}">Week 1</option>
             </select>
-        </div>
 
-        <!-- Drag and Drop Area -->
-        <div class="file-drop-area" id="drop-area">
-            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-            <span class="file-msg">Choose a file or drag &amp; drop it here</span>
-            <span class="file-hint">Supports .csv, .xlsx, .xls</span>
-            <input class="file-input" type="file" id="file" name="file" required onchange="displayFileName(this)">
-        </div>
-        <div class="file-name" id="file-name-display"></div>
+            <label for="file" class="form-label fw-semibold">Credit &amp; Fort Data File</label>
+            <div class="upload-drop" id="drop-area">
+                <i class="bi bi-file-earmark-arrow-up upload-drop-icon"></i>
+                <span class="fw-semibold">Click to browse or drag a file here</span>
+                <span class="small text-muted mt-1">Supports .csv, .xlsx and .xls</span>
+                <input class="upload-input" type="file" id="file" name="file" accept=".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel" required>
+            </div>
+            <div class="file-name" id="file-name-display"></div>
 
-        <button type="submit" class="btn-submit">Process File</button>
-    </form>
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-4">
+                <button type="button" class="btn btn-outline-secondary" onclick="goBack('/credit-fort/tracker')">
+                    <i class="bi bi-arrow-left me-1"></i> Back
+                </button>
+                <button type="submit" class="btn app-btn-primary">
+                    <i class="bi bi-cloud-upload me-1"></i> Process File
+                </button>
+            </div>
+        </form>
+    </section>
+</main>
 
-    <a th:href="@{/credit-fort/tracker}" class="nav-link">View Credit &amp; Fort Tracker &rarr;</a>
-    <a th:href="@{/}" class="nav-link">&larr; Back to Dashboard</a>
-</div>
-
-<script>
-    function displayFileName(input) {
-        const display = document.getElementById('file-name-display');
-        if (input.files && input.files[0]) {
-            display.textContent = "Selected: " + input.files[0].name;
-        } else {
-            display.textContent = "";
-        }
-    }
-
-    const dropArea = document.getElementById('drop-area');
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.add('drag-over'), false);
-    });
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, () => dropArea.classList.remove('drag-over'), false);
-    });
-</script>
-
+<script th:replace="~{fragments/layout :: scripts}"></script>
+<script th:replace="~{fragments/layout :: appScripts}"></script>
+<script>bindFileDrop('drop-area', 'file', 'file-name-display');</script>
 </body>
 </html>

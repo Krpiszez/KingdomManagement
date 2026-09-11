@@ -1,0 +1,244 @@
+:root {
+    --app-primary: #4f46e5;
+    --app-primary-dark: #4338ca;
+    --app-primary-soft: #eef2ff;
+    --app-bg: #f5f7fb;
+    --app-surface: #ffffff;
+    --app-text: #172033;
+    --app-muted: #667085;
+    --app-border: #e4e7ec;
+    --app-success: #198754;
+    --app-danger: #dc3545;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--app-bg);
+    color: var(--app-text);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+}
+
+a { color: var(--app-primary); }
+a:hover { color: var(--app-primary-dark); }
+
+.app-navbar {
+    background: linear-gradient(135deg, #4f46e5 0%, #6d4cc2 100%);
+    box-shadow: 0 4px 18px rgba(31, 41, 55, 0.12);
+    min-height: 68px;
+}
+
+.app-navbar-inner { min-height: 68px; }
+
+.app-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff !important;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+}
+
+.app-brand-icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.app-navbar .nav-link {
+    color: rgba(255,255,255,0.82);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-weight: 600;
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link.active {
+    color: #fff;
+    background: rgba(255,255,255,0.14);
+}
+
+.app-page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 32px 20px 56px;
+}
+
+.app-page.narrow { max-width: 760px; }
+.app-page.medium { max-width: 980px; }
+
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: clamp(1.65rem, 3vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -0.025em;
+    color: #182230;
+}
+
+.page-subtitle {
+    margin: 7px 0 0;
+    color: var(--app-muted);
+    max-width: 760px;
+}
+
+.back-button { white-space: nowrap; border-radius: 9px; }
+
+.app-card {
+    background: var(--app-surface);
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+}
+
+.app-card-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--app-border);
+}
+
+.app-card-body { padding: 20px; }
+
+.section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.section-muted { color: var(--app-muted); }
+
+.app-table { margin: 0; }
+.app-table thead th {
+    background: #f8fafc;
+    color: #475467;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    border-bottom: 1px solid var(--app-border);
+    white-space: nowrap;
+}
+.app-table td { border-color: #eef0f3; }
+
+.sortable { cursor: pointer; user-select: none; }
+.sortable:hover { background: #f0f2f5 !important; }
+.sort-icon { font-size: 0.78em; margin-left: 5px; color: #98a2b3; }
+
+.app-btn-primary {
+    background: var(--app-primary);
+    border-color: var(--app-primary);
+    color: #fff;
+}
+.app-btn-primary:hover { background: var(--app-primary-dark); border-color: var(--app-primary-dark); color: #fff; }
+
+.app-btn-soft {
+    background: var(--app-primary-soft);
+    color: var(--app-primary-dark);
+    border: 1px solid #c7d2fe;
+}
+.app-btn-soft:hover { background: #e0e7ff; color: var(--app-primary-dark); }
+
+.metric-card {
+    height: 100%;
+    padding: 22px;
+    border: 1px solid var(--app-border);
+    border-radius: 14px;
+    background: #fff;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(16, 24, 40, 0.09);
+    border-color: #c7d2fe;
+}
+.metric-card-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--app-primary-soft);
+    color: var(--app-primary-dark);
+    font-size: 1.25rem;
+}
+
+.status-badge { border-radius: 999px; padding: 5px 10px; font-weight: 700; }
+
+.upload-card { max-width: 680px; margin: 0 auto; }
+.upload-drop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 34px 18px;
+    border: 2px dashed #d0d5dd;
+    border-radius: 12px;
+    background: #fafbfc;
+    cursor: pointer;
+    transition: .18s ease;
+}
+.upload-drop:hover, .upload-drop.drag-over { border-color: var(--app-primary); background: #f8f9ff; }
+.upload-drop-icon { font-size: 2.5rem; color: #98a2b3; margin-bottom: 10px; }
+.upload-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.file-name { margin-top: 10px; font-size: .9rem; font-weight: 650; color: var(--app-primary-dark); word-break: break-word; }
+
+.alert { border-radius: 10px; }
+.req-box {
+    background: #f5f7ff;
+    border: 1px solid #dbe2ff;
+    color: #344054;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: .88rem;
+    line-height: 1.55;
+}
+
+.empty-state { padding: 36px 20px; color: var(--app-muted); text-align: center; }
+.empty-state i { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+
+.avatar-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--app-primary-soft);
+    color: var(--app-primary-dark);
+    font-size: 1.35rem;
+}
+
+.character-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f8fafc;
+    border: 1px solid #dfe3e8;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: .82rem;
+    margin: 2px;
+}
+
+@media (max-width: 767.98px) {
+    .app-page { padding: 24px 14px 40px; }
+    .page-header { flex-direction: column; }
+    .back-button { align-self: flex-start; }
+    .app-navbar .nav-link { margin-top: 2px; }
+}
