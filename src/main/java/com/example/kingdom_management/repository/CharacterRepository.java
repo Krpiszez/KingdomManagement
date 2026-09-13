@@ -12,4 +12,6 @@ public interface CharacterRepository extends JpaRepository<Character, Long> {
     Optional<Character> findByCharacterId(Long characterID);
 
     List<Character> findByType(CharacterType type);
+
+    boolean existsByCharacterIdAndIdNot(Long characterId, Long id);
 }

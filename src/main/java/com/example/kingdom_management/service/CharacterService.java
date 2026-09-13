@@ -6,15 +6,18 @@ import com.example.kingdom_management.domain.Governor;
 import com.example.kingdom_management.domain.enums.CharacterType;
 import com.example.kingdom_management.repository.CharacterRepository;
 import com.example.kingdom_management.repository.GovernorRepository;
+import com.example.kingdom_management.web.form.CharacterEditForm;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -45,7 +48,8 @@ public class CharacterService {
     }
 
     private void processCsv(MultipartFile file) throws Exception {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+        try (InputStream bomIn = BOMInputStream.builder().setInputStream(file.getInputStream()).get();
+             BufferedReader reader = new BufferedReader(new InputStreamReader(bomIn, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
                      .setHeader()
                      .setSkipHeaderRecord(true)
@@ -157,6 +161,54 @@ public class CharacterService {
                     newGov.setGovernorName(governorName);
                     return governorRepository.save(newGov);
                 });
+    }
+
+    public Character findById(Long id) {
+        return characterRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Character not found: " + id));
+    }
+
+    @Transactional
+    public Character update(Long id, CharacterEditForm form) {
+        Character character = findById(id);
+
+        if (form.getCharacterId() == null || form.getCharacterId() <= 0) {
+            throw new IllegalArgumentException("Character ID must be a positive number.");
+        }
+        if (form.getCharacterName() == null || form.getCharacterName().isBlank()) {
+            throw new IllegalArgumentException("Character name is required.");
+        }
+        if (form.getType() == null) {
+            throw new IllegalArgumentException("Character type is required.");
+        }
+        if (form.getPower() != null && form.getPower() < 0) {
+            throw new IllegalArgumentException("Character power cannot be negative.");
+        }
+        if (form.getGovernorId() == null) {
+            throw new IllegalArgumentException("A governor must be selected.");
+        }
+        if (characterRepository.existsByCharacterIdAndIdNot(form.getCharacterId(), id)) {
+            throw new IllegalArgumentException("A character with that Character ID already exists.");
+        }
+
+        Governor newGovernor = governorRepository.findById(form.getGovernorId())
+                .orElseThrow(() -> new IllegalArgumentException("Selected governor was not found."));
+
+        Governor oldGovernor = character.getGovernor();
+        if (oldGovernor != newGovernor) {
+            if (oldGovernor != null) {
+                oldGovernor.removeCharacter(character);
+            }
+            newGovernor.addCharacter(character);
+        }
+
+        character.setCharacterId(form.getCharacterId());
+        character.setCharacterName(form.getCharacterName().trim());
+        character.setType(form.getType());
+        character.setPower(form.getPower());
+        character.setGovernor(newGovernor);
+
+        return characterRepository.save(character);
     }
 
     public Character getCharacterById(Long characterId) {

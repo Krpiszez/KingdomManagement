@@ -10,4 +10,6 @@ public interface GovernorRepository extends JpaRepository<Governor, Long> {
     Optional<Governor> findByGovernorNameAndCharactersCharacterName(String governorName, String characterName);
 
     Optional<Governor> findByGovernorName(String name);
+
+    boolean existsByGovernorNameAndIdNot(String governorName, Long id);
 }

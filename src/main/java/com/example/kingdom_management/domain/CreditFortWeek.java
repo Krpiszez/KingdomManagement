@@ -27,6 +27,10 @@ public class CreditFortWeek {
     // Kept per-week (rather than a hardcoded constant) in case the alliance
     // changes the requirement in future weeks.
     private Integer fortRequirement = 70;
+    private Long totalFortsDone;
+    private Long totalBuildingScore;
+    private Long totalTechScore;
+
 
     @OneToMany(mappedBy = "creditFortWeek", cascade = CascadeType.ALL)
     private List<CharacterCreditFortScore> scores = new ArrayList<>();

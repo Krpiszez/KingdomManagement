@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Edit Character')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar('governors')}"></nav>
+
+<main class="app-page narrow">
+    <div th:replace="~{fragments/layout :: pageHeader('Edit Character', 'Update character details, power, type or governor assignment.', '/governors')}"></div>
+
+    <section class="app-card app-card-body">
+        <div th:if="${error}" class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${error}">Unable to update character.</span>
+        </div>
+
+        <form th:action="@{/characters/edit/{id}(id=${form.id})}" th:object="${form}" method="post">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="characterDbId" class="form-label fw-semibold">Database ID</label>
+                    <input id="characterDbId" type="text" class="form-control" th:value="${form.id}" disabled>
+                </div>
+                <div class="col-md-6">
+                    <label for="characterId" class="form-label fw-semibold">Character ID</label>
+                    <input id="characterId" type="number" class="form-control" th:field="*{characterId}" min="1" step="1" required>
+                </div>
+
+                <div class="col-md-8">
+                    <label for="characterName" class="form-label fw-semibold">Character Name</label>
+                    <input id="characterName" type="text" class="form-control" th:field="*{characterName}" maxlength="255" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="type" class="form-label fw-semibold">Type</label>
+                    <select id="type" class="form-select" th:field="*{type}" required>
+                        <option value="">Select type</option>
+                        <option th:each="characterType : ${characterTypes}"
+                                th:value="${characterType}"
+                                th:text="${characterType}">MAIN</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="power" class="form-label fw-semibold">Power</label>
+                    <input id="power" type="number" class="form-control" th:field="*{power}" min="0" step="1" placeholder="e.g. 25000000">
+                </div>
+                <div class="col-md-6">
+                    <label for="governorId" class="form-label fw-semibold">Governor</label>
+                    <select id="governorId" class="form-select" th:field="*{governorId}" required>
+                        <option value="">Select governor</option>
+                        <option th:each="governor : ${governors}"
+                                th:value="${governor.id}"
+                                th:text="${governor.governorName + ' (#' + governor.id + ')'}">Governor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="alert alert-light border mt-4 mb-4 small">
+                <i class="bi bi-info-circle me-1"></i>
+                Changing the governor assignment moves this character to the selected governor. Existing AME and Credit/Fort records remain attached to the character.
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between gap-2">
+                <a class="btn btn-outline-secondary" th:href="@{/governors}">
+                    <i class="bi bi-arrow-left me-1"></i> Cancel
+                </a>
+                <button type="submit" class="btn app-btn-primary">
+                    <i class="bi bi-check2 me-1"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </section>
+</main>
+
+<script th:replace="~{fragments/layout :: scripts}"></script>
+<script th:replace="~{fragments/layout :: appScripts}"></script>
+</body>
+</html>
