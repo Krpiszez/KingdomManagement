@@ -30,6 +30,62 @@
             </div>
         </div>
 
+        <div class="app-card-body border-bottom">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="weekly-score-card">
+                        <div class="weekly-score-label"><i class="bi bi-hammer me-1"></i> Build score</div>
+                        <div class="weekly-score-value" th:text="${selectedWeek != null ? #numbers.formatInteger(selectedWeek.totalBuildingScore ?: 0, 1, 'COMMA') : '0'}">0</div>
+                        <div class="small text-muted">Kingdom total for this week</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="weekly-score-card">
+                        <div class="weekly-score-label"><i class="bi bi-cpu me-1"></i> Tech score</div>
+                        <div class="weekly-score-value" th:text="${selectedWeek != null ? #numbers.formatInteger(selectedWeek.totalTechScore ?: 0, 1, 'COMMA') : '0'}">0</div>
+                        <div class="small text-muted">Kingdom total for this week</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="weekly-score-card weekly-score-card-primary">
+                        <div class="weekly-score-label"><i class="bi bi-lightning-charge me-1"></i> Combined credit score</div>
+                        <div class="weekly-score-value" th:text="${selectedWeek != null ? #numbers.formatInteger(selectedWeek.totalCreditScore ?: 0, 1, 'COMMA') : '0'}">0</div>
+                        <div class="small text-muted">Build + Tech</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-card-body border-bottom" th:if="${not #lists.isEmpty(weeks)}">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="section-title">Weekly Credit Score History</h2>
+                    <div class="small text-muted mt-1">Kingdom-wide totals across every uploaded week.</div>
+                </div>
+            </div>
+            <div class="weekly-history-list">
+                <a th:each="week : ${weeks}"
+                   th:href="@{/credit-fort/tracker(weekId=${week.id})}"
+                   class="weekly-history-row text-decoration-none"
+                   th:classappend="${selectedWeekId != null and week.id == selectedWeekId} ? ' active' : ''">
+                    <div class="weekly-history-week" th:text="${week.name}">Week 1</div>
+                    <div class="weekly-history-metric">
+                        <span class="weekly-history-metric-label">Build</span>
+                        <strong th:text="${#numbers.formatInteger(week.totalBuildingScore ?: 0, 1, 'COMMA')}">0</strong>
+                    </div>
+                    <div class="weekly-history-metric">
+                        <span class="weekly-history-metric-label">Tech</span>
+                        <strong th:text="${#numbers.formatInteger(week.totalTechScore ?: 0, 1, 'COMMA')}">0</strong>
+                    </div>
+                    <div class="weekly-history-metric combined">
+                        <span class="weekly-history-metric-label">Combined</span>
+                        <strong th:text="${#numbers.formatInteger(week.totalCreditScore ?: 0, 1, 'COMMA')}">0</strong>
+                    </div>
+                    <i class="bi bi-chevron-right text-muted"></i>
+                </a>
+            </div>
+        </div>
+
         <div class="app-card-body p-0">
             <div class="table-responsive">
                 <table class="table app-table table-hover align-middle" id="summaryTable">

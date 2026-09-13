@@ -67,6 +67,9 @@ public class CreditFortService {
             throw new IllegalArgumentException("Unsupported file type. Please upload a .csv, .xlsx, or .xls file.");
         }
 
+        // Rebuild the kingdom-wide weekly totals after every import so the
+        // dashboard always reflects the character-level source records.
+        recomputeWeeklyTotals(week);
         recomputeGovernorSummaries(week);
     }
 
@@ -241,8 +244,35 @@ public class CreditFortService {
         }
     }
 
+    @Transactional
+    public void recomputeWeeklyTotals(CreditFortWeek week) {
+        List<CharacterCreditFortScore> scores = characterCreditFortScoreRepository
+                .findByCreditFortWeekId(week.getId());
+
+        long buildingTotal = scores.stream()
+                .mapToLong(score -> score.getBuildCredits() == null ? 0L : score.getBuildCredits())
+                .sum();
+        long techTotal = scores.stream()
+                .mapToLong(score -> score.getTechCredits() == null ? 0L : score.getTechCredits())
+                .sum();
+        long fortsTotal = scores.stream()
+                .mapToLong(score -> score.getFortsDone() == null ? 0L : score.getFortsDone())
+                .sum();
+
+        week.setTotalBuildingScore(buildingTotal);
+        week.setTotalTechScore(techTotal);
+        week.setTotalFortsDone(fortsTotal);
+        creditFortWeekRepository.save(week);
+    }
+
+    @Transactional
     public List<CreditFortWeek> getAllWeeks() {
-        return creditFortWeekRepository.findAll();
+        List<CreditFortWeek> weeks = creditFortWeekRepository.findAllByOrderByWeekNumberAsc();
+
+        // Backfill/reconcile totals for weeks that were imported before the
+        // weekly-total fields existed, and keep the dashboard self-healing.
+        weeks.forEach(this::recomputeWeeklyTotals);
+        return weeks;
     }
 
     public List<CharacterCreditFortScore> getScoresByWeek(Long weekId) {

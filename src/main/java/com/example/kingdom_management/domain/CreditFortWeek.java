@@ -31,6 +31,17 @@ public class CreditFortWeek {
     private Long totalBuildingScore;
     private Long totalTechScore;
 
+    /**
+     * Combined weekly credit score (build + tech).
+     * Kept as a derived value so there is only one source of truth for the
+     * persisted build and tech totals.
+     */
+    @Transient
+    public Long getTotalCreditScore() {
+        return (totalBuildingScore == null ? 0L : totalBuildingScore)
+                + (totalTechScore == null ? 0L : totalTechScore);
+    }
+
 
     @OneToMany(mappedBy = "creditFortWeek", cascade = CascadeType.ALL)
     private List<CharacterCreditFortScore> scores = new ArrayList<>();
